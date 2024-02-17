@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import api from '../utils/axios';
 
 import type { Task } from '../utils/types';
@@ -20,6 +20,15 @@ export const useGetTasks = () => {
   };
 
   getTasks();
+  document.addEventListener('tasksUpdated', getTasks)
 
-  return { state, tasks, getTasks };
+  //Removing the event listener when Unmounted to avoid memory leaks
+  onUnmounted(() => {
+    document.removeEventListener('tasksUpdated', getTasks);
+  });
+
+  return { state, tasks };
 };
+
+// Another way to handle task updates could be Vuex, and update the global state of the tasks 
+// when a task is created, deleted or updated, in this case lets keep it simple

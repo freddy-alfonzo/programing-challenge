@@ -1,32 +1,27 @@
 <template>
-  <div class="task-display">
-    <!--
-      Mission Two: Add ability to check and uncheck tasks
-
-      Display the tasks according to the design in the README.md file.
-
-      Definition of done:
-      [ ] A checkbox is visible to the left of the task
-      [ ] Clicking a checked task will uncheck it
-      [ ] Clicking an unchecked task will check it
-      [ ] All task changes are persisted to the database
-
-      Your submission will be judged out of ten points based
-      on the following criteria:
-
-      Design fidelity - 5 points total
-        - Is the spacing correct? (e.g. padding, margin) - 2 points
-        - Is there good interaction feedback? (e.g. hover, focus, active states) - 3 points
-      Code quality - 5 points
-        - Are concerns clearly separated? (e.g. clear responsibilities for functions, etc.) - 3 point
-        - Is the code easy to read and understand? - 2 points
-    -->
-    <p>{{ task.content }}</p>
+  <div class="task-card">
+    <div class="task-card__container">
+      <input
+        type="checkbox"
+        class="task-card__checkbox"
+        @click="updateTask(task.is_complete, task.tasks_id, task)"
+        v-model="task.is_complete"
+      />
+      <p>{{ task.content }}</p>
+    </div>
+    <span
+      @click="deleteTask(task.tasks_id)"
+      class="material-symbols-outlined task-card__deleteBtn"
+    >
+      delete
+    </span>
   </div>
 </template>
-
 <script setup lang="ts">
-import type { Task } from '../utils/types';
+import { defineProps } from "vue";
+import type { Task } from "../utils/types";
+import { deleteTask } from "../composables/deleteTask";
+import { updateTask } from "../composables/updateTask";
 
 defineProps<{
   task: Task;
@@ -34,12 +29,35 @@ defineProps<{
 </script>
 
 <style scoped lang="scss">
-.task-display {
+.task-card {
+  display: flex;
+  justify-content: space-between;
   color: var(--color-heading);
   font-size: var(--fs-3);
   font-weight: 500;
   box-shadow: var(--box-shadow-1);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--border-radius-1);
+}
+
+.task-card__container {
+  display: flex;
+}
+
+.task-card__checkbox {
+  width: var(--fs-2);
+  margin-right: 0.4rem;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.task-card__deleteBtn {
+  font-size: var(--fs-4);
+  color: #ee0000;
+  cursor: pointer;
+  &:hover {
+    color: #aa0000;
+  }
 }
 </style>

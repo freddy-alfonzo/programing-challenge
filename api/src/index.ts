@@ -1,6 +1,6 @@
-import Hapi from '@hapi/hapi';
-import { makeDb, startDatabase } from './database';
-import dotenv from 'dotenv';
+import Hapi from "@hapi/hapi";
+import { makeDb, startDatabase } from "./database";
+import dotenv from "dotenv";
 
 const init = async () => {
   dotenv.config();
@@ -8,60 +8,83 @@ const init = async () => {
 
   const server = Hapi.server({
     port: 4000,
-    host: 'localhost',
+    host: "localhost",
     routes: {
       cors: {
-        origin: ['*']
-      }
-    }
+        origin: ["*"],
+      },
+    },
   });
 
   server.route({
-    method: 'GET',
-    path: '/tasks',
+    method: "GET",
+    path: "/tasks",
     handler: async (r, h) => {
       try {
-        const { rows } = await db.raw('select * from tasks');
-        return h.response(rows).code(200)
+        //modified the query to always get the tasks ordered by id
+        const { rows } = await db.raw("select * from tasks order by tasks_id");
+        return h.response(rows).code(200);
       } catch (error) {
         console.error(error);
-        return h.response().code(500)        
+        return h.response().code(500);
       }
-    } 
+    },
   });
 
   server.route({
-    method: 'POST',
-    path: '/mission-two', // Bonus points if you give it a sensical name ;)
+    method: "POST",
+    path: "/task",
     handler: async (r, h) => {
-      /**
-       * Mission Two: Insert a task into the database.
-       * 
-       * Receive a post request from the front end
-       * and insert it into the database.details, too
-       * 
-       * Definition of done:
-       * [ ] the record is inserted into the database
-       * [ ] a success response is returned
-       * 
-       * Your submission will be judged out of 10 points based on
-       * the following criteria:
-       * 
-       * - Works as expected - 5 points
-       * - Code quality - 5 points
-       *   - Is the code clean and easy to read?
-       *   - Are there any obvious bugs?
-       *   - Are there any obvious performance issues?
-       *   - Are there comments where necessary?
-       */
-    } 
+      try {
+        //Getting the task content from the request and inserting it into the tasks table
+        const task = r.payload;
+        await db("tasks").insert({ content: task });
+        return h.response({ message: "Task inserted succesfully" }).code(200);
+      } catch (error) {
+        console.error(error);
+        return h.response().code(500);
+      }
+    },
+  });
+
+  server.route({
+    method: "DELETE",
+    path: "/task/{userId}",
+    handler: async (r, h) => {
+      try {
+        //Deleting the task that has the same id of the one clicked
+        const id = r.params.userId;
+        await db("tasks").where("tasks_id", id).del();
+        return h.response({ message: "Task deleted succesfully" }).code(200);
+      } catch (error) {
+        console.error(error);
+        return h.response().code(500);
+      }
+    },
+  });
+
+  server.route({
+    method: "PUT",
+    path: "/task/{userId}",
+    handler: async (r, h) => {
+      try {
+        //Updating the status of the task that has the same id of the one clicked
+        const id = r.params.userId;
+        const payload = r.payload as {status: boolean};
+        await db("tasks").where('tasks_id', id).update({ is_complete: !payload.status });
+        return h.response({ message: `Task updated succesfully`}).code(200);
+      } catch (error) {
+        console.error(error);
+        return h.response().code(500);
+      }
+    },
   });
 
   await server.start();
-  console.log('Server running on %s', server.info.uri);
+  console.log("Server running on %s", server.info.uri);
 };
 
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   console.error(err);
   process.exit(1);
 });

@@ -4,17 +4,8 @@
       <h1>To do</h1>
       <p v-if="state === 'loading'">Loading...</p>
       <p v-else-if="state === 'failed'">Error fetching data</p>
-      <div 
-        v-else-if="state === 'loaded'"  
-        class="items"
-      >
-        <TaskDisplay
-          v-for="task in tasks"
-          :key="task.tasksId"
-          :task="task"
-        />
-
-        <!-- Mission one is inside the task input! -->
+      <div v-else-if="state === 'loaded'" class="items">
+        <TaskDisplay v-for="task in tasks" :key="task.tasksId" :task="task" />
         <TaskInput />
       </div>
     </div>
@@ -22,11 +13,11 @@
 </template>
 
 <script setup lang="ts">
-import TaskDisplay from './TaskDisplay.vue';
-import TaskInput from './TaskInput.vue';
+import TaskDisplay from "./TaskDisplay.vue";
+import TaskInput from "./TaskInput.vue";
 
 /* composables */
-import { useGetTasks } from '../composables/useGetTasks';
+import { useGetTasks } from "../composables/useGetTasks";
 
 const { tasks, state } = useGetTasks();
 </script>
@@ -48,7 +39,7 @@ const { tasks, state } = useGetTasks();
       font-weight: 800;
       font-size: var(--fs-5);
     }
-    
+
     .items {
       padding-top: var(--space-3);
       display: flex;
